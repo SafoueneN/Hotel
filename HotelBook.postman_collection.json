@@ -1,0 +1,216 @@
+{
+  "info": {
+    "name": "HotelBook",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "reservation_url", "value": "http://localhost:8081" },
+    { "key": "payment_url", "value": "http://localhost:8082" }
+  ],
+  "item": [
+    {
+      "name": "reservation-service",
+      "item": [
+        {
+          "name": "Hotels",
+          "item": [
+            { "name": "Lister les hotels", "request": { "method": "GET", "url": "{{reservation_url}}/api/hotels" } },
+            { "name": "Obtenir un hotel par id", "request": { "method": "GET", "url": "{{reservation_url}}/api/hotels/1" } },
+            {
+              "name": "Creer un hotel",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{reservation_url}}/api/hotels",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nom\": \"Hotel Test\",\n  \"ville\": \"Fes\",\n  \"adresse\": \"1 Rue Test\",\n  \"description\": \"Un hotel de test\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Modifier un hotel",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{reservation_url}}/api/hotels/1",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"nom\": \"Hotel Atlas Renove\",\n  \"ville\": \"Marrakech\",\n  \"adresse\": \"12 Avenue Mohammed VI\",\n  \"description\": \"Renove en 2026\"\n}"
+                }
+              }
+            },
+            { "name": "Supprimer un hotel", "request": { "method": "DELETE", "url": "{{reservation_url}}/api/hotels/1" } }
+          ]
+        },
+        {
+          "name": "Chambres",
+          "item": [
+            { "name": "Lister les chambres", "request": { "method": "GET", "url": "{{reservation_url}}/api/chambres" } },
+            { "name": "Lister les chambres d'un hotel", "request": { "method": "GET", "url": "{{reservation_url}}/api/chambres?hotelId=1" } },
+            { "name": "Lister les chambres disponibles (flag)", "request": { "method": "GET", "url": "{{reservation_url}}/api/chambres?disponible=true" } },
+            {
+              "name": "[AVANCE] Rechercher chambres disponibles par ville/periode",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{reservation_url}}/api/chambres/disponibles/recherche?ville=Marrakech&dateDebut=2026-09-01&dateFin=2026-09-05",
+                  "host": ["{{reservation_url}}"],
+                  "path": ["api", "chambres", "disponibles", "recherche"],
+                  "query": [
+                    { "key": "ville", "value": "Marrakech" },
+                    { "key": "dateDebut", "value": "2026-09-01" },
+                    { "key": "dateFin", "value": "2026-09-05" }
+                  ]
+                }
+              }
+            },
+            { "name": "Obtenir une chambre par id", "request": { "method": "GET", "url": "{{reservation_url}}/api/chambres/1" } },
+            {
+              "name": "Creer une chambre",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{reservation_url}}/api/chambres",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"501\",\n  \"type\": \"DOUBLE\",\n  \"prixParNuit\": 600,\n  \"capacite\": 2,\n  \"disponible\": true,\n  \"hotel\": { \"id\": 1 }\n}"
+                }
+              }
+            },
+            {
+              "name": "Modifier une chambre",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{reservation_url}}/api/chambres/1",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"numero\": \"101\",\n  \"type\": \"SIMPLE\",\n  \"prixParNuit\": 480,\n  \"capacite\": 1,\n  \"disponible\": true\n}"
+                }
+              }
+            },
+            { "name": "Supprimer une chambre", "request": { "method": "DELETE", "url": "{{reservation_url}}/api/chambres/1" } }
+          ]
+        },
+        {
+          "name": "Reservations",
+          "item": [
+            { "name": "Lister les reservations", "request": { "method": "GET", "url": "{{reservation_url}}/api/reservations" } },
+            { "name": "Lister les reservations d'un client", "request": { "method": "GET", "url": "{{reservation_url}}/api/reservations?email=ali@test.com" } },
+            { "name": "Obtenir une reservation par id", "request": { "method": "GET", "url": "{{reservation_url}}/api/reservations/1" } },
+            {
+              "name": "Creer une reservation",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{reservation_url}}/api/reservations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chambreId\": 1,\n  \"clientNom\": \"Ali Test\",\n  \"clientEmail\": \"ali@test.com\",\n  \"dateDebut\": \"2026-09-01\",\n  \"dateFin\": \"2026-09-05\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Modifier une reservation",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{reservation_url}}/api/reservations/1",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"chambreId\": 1,\n  \"clientNom\": \"Ali Modifie\",\n  \"clientEmail\": \"ali@test.com\",\n  \"dateDebut\": \"2026-09-02\",\n  \"dateFin\": \"2026-09-04\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Changer le statut d'une reservation",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{reservation_url}}/api/reservations/1/statut",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"statut\": \"CONFIRMEE\"\n}"
+                }
+              }
+            },
+            { "name": "Supprimer une reservation", "request": { "method": "DELETE", "url": "{{reservation_url}}/api/reservations/1" } }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "payment-service",
+      "item": [
+        { "name": "Health check", "request": { "method": "GET", "url": "{{payment_url}}/health" } },
+        {
+          "name": "Paiements",
+          "item": [
+            { "name": "Lister les paiements", "request": { "method": "GET", "url": "{{payment_url}}/api/paiements" } },
+            { "name": "[AVANCE] Statistiques de paiements", "request": { "method": "GET", "url": "{{payment_url}}/api/paiements/stats" } },
+            { "name": "Lister les paiements d'une reservation", "request": { "method": "GET", "url": "{{payment_url}}/api/paiements/reservation/1" } },
+            { "name": "Obtenir un paiement par id", "request": { "method": "GET", "url": "{{payment_url}}/api/paiements/REMPLACER_ID" } },
+            {
+              "name": "Creer un paiement",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{payment_url}}/api/paiements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reservationId\": 1,\n  \"clientEmail\": \"ali@test.com\",\n  \"montant\": 1800,\n  \"methode\": \"CARTE\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Modifier un paiement",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{payment_url}}/api/paiements/REMPLACER_ID",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"statut\": \"REUSSI\"\n}"
+                }
+              }
+            },
+            { "name": "Supprimer un paiement", "request": { "method": "DELETE", "url": "{{payment_url}}/api/paiements/REMPLACER_ID" } }
+          ]
+        },
+        {
+          "name": "Notifications",
+          "item": [
+            { "name": "Lister les notifications", "request": { "method": "GET", "url": "{{payment_url}}/api/notifications" } },
+            { "name": "Lister les notifications d'un destinataire", "request": { "method": "GET", "url": "{{payment_url}}/api/notifications/ali@test.com" } },
+            {
+              "name": "Creer une notification",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{payment_url}}/api/notifications",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"destinataire\": \"ali@test.com\",\n  \"sujet\": \"Test\",\n  \"message\": \"Ceci est un test manuel\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Modifier une notification",
+              "request": {
+                "method": "PUT",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "url": "{{payment_url}}/api/notifications/id/REMPLACER_ID",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envoyee\": true\n}"
+                }
+              }
+            },
+            { "name": "Supprimer une notification", "request": { "method": "DELETE", "url": "{{payment_url}}/api/notifications/id/REMPLACER_ID" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

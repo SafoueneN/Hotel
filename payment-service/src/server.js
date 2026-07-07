@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const createEurekaClient = require('./config/eureka');
 const paiementRoutes = require('./routes/paiementRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 
@@ -32,6 +33,15 @@ connectDB()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`[payment-service] Démarré sur le port ${PORT}`);
+
+      const eurekaClient = createEurekaClient(PORT);
+      eurekaClient.start((error) => {
+        if (error) {
+          console.error('[payment-service] Échec d\'enregistrement auprès d\'Eureka', error);
+        } else {
+          console.log('[payment-service] Enregistré auprès d\'Eureka');
+        }
+      });
     });
   })
   .catch((err) => {
