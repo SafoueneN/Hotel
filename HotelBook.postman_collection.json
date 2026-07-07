@@ -5,7 +5,8 @@
   },
   "variable": [
     { "key": "reservation_url", "value": "http://localhost:8081" },
-    { "key": "payment_url", "value": "http://localhost:8082" }
+    { "key": "payment_url", "value": "http://localhost:8082" },
+    { "key": "gateway_url", "value": "http://localhost:8090" }
   ],
   "item": [
     {

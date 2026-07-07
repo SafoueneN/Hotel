@@ -1,0 +1,29 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+          routes:
+            - id: reservation-service
+              uri: lb://reservation-service
+              predicates:
+                - Path=/api/hotels/**,/api/chambres/**,/api/reservations/**
+            - id: payment-service
+              uri: lb://payment-service
+              predicates:
+                - Path=/api/paiements/**,/api/notifications/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
