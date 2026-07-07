@@ -1,11 +1,13 @@
 package com.hotelbook.reservation.service;
 
+import com.hotelbook.reservation.exception.ChambreIndisponibleException;
 import com.hotelbook.reservation.exception.ResourceNotFoundException;
 import com.hotelbook.reservation.model.Chambre;
 import com.hotelbook.reservation.repository.ChambreRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -24,6 +26,13 @@ public class ChambreService {
 
     public List<Chambre> findDisponibles() {
         return chambreRepository.findByDisponibleTrue();
+    }
+
+    public List<Chambre> rechercherDisponibles(String ville, LocalDate dateDebut, LocalDate dateFin) {
+        if (dateFin == null || dateDebut == null || !dateFin.isAfter(dateDebut)) {
+            throw new ChambreIndisponibleException("La date de fin doit être après la date de début");
+        }
+        return chambreRepository.rechercherDisponibles(ville, dateDebut, dateFin);
     }
 
     public Chambre findById(Long id) {

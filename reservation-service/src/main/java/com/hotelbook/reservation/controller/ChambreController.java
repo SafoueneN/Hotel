@@ -4,9 +4,11 @@ import com.hotelbook.reservation.model.Chambre;
 import com.hotelbook.reservation.service.ChambreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -26,6 +28,14 @@ public class ChambreController {
             return chambreService.findDisponibles();
         }
         return chambreService.findAll();
+    }
+
+    @GetMapping("/disponibles/recherche")
+    public List<Chambre> rechercherDisponibles(
+            @RequestParam String ville,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateDebut,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFin) {
+        return chambreService.rechercherDisponibles(ville, dateDebut, dateFin);
     }
 
     @GetMapping("/{id}")

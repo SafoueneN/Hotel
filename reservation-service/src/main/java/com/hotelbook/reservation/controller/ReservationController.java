@@ -38,6 +38,11 @@ public class ReservationController {
         return reservationService.creer(request);
     }
 
+    @PutMapping("/{id}")
+    public Reservation mettreAJour(@PathVariable Long id, @Valid @RequestBody ReservationRequest request) {
+        return reservationService.mettreAJour(id, request);
+    }
+
     @PatchMapping("/{id}/statut")
     public Reservation changerStatut(@PathVariable Long id, @RequestBody Map<String, String> body) {
         StatutReservation statut = StatutReservation.valueOf(body.get("statut"));
@@ -46,7 +51,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void annuler(@PathVariable Long id) {
-        reservationService.annuler(id);
+    public void supprimer(@PathVariable Long id) {
+        reservationService.supprimer(id);
     }
 }

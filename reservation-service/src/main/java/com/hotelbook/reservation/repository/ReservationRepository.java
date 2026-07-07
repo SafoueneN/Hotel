@@ -26,5 +26,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("dateFin") LocalDate dateFin
     );
 
+    @Query("""
+        SELECT r FROM Reservation r
+        WHERE r.chambre.id = :chambreId
+        AND r.id <> :excludeId
+        AND r.statut <> com.hotelbook.reservation.model.StatutReservation.ANNULEE
+        AND r.dateDebut < :dateFin
+        AND r.dateFin > :dateDebut
+        """)
+    List<Reservation> findConflitsPourModification(
+            @Param("chambreId") Long chambreId,
+            @Param("dateDebut") LocalDate dateDebut,
+            @Param("dateFin") LocalDate dateFin,
+            @Param("excludeId") Long excludeId
+    );
+
     List<Reservation> findByStatut(StatutReservation statut);
 }

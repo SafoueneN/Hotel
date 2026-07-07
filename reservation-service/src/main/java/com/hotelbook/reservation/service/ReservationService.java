@@ -72,6 +72,37 @@ public class ReservationService {
     }
 
     @Transactional
+    public Reservation mettreAJour(Long id, ReservationRequest request) {
+        Reservation reservation = findById(id);
+
+        Chambre chambre = chambreRepository.findById(request.getChambreId())
+                .orElseThrow(() -> new ResourceNotFoundException("Chambre introuvable avec id " + request.getChambreId()));
+
+        if (!request.getDateFin().isAfter(request.getDateDebut())) {
+            throw new ChambreIndisponibleException("La date de fin doit être après la date de début");
+        }
+
+        List<Reservation> conflits = reservationRepository.findConflitsPourModification(
+                chambre.getId(), request.getDateDebut(), request.getDateFin(), id);
+        if (!conflits.isEmpty()) {
+            throw new ChambreIndisponibleException(
+                    "La chambre " + chambre.getNumero() + " est déjà réservée sur cette période");
+        }
+
+        long nuits = ChronoUnit.DAYS.between(request.getDateDebut(), request.getDateFin());
+        BigDecimal montantTotal = chambre.getPrixParNuit().multiply(BigDecimal.valueOf(nuits));
+
+        reservation.setChambre(chambre);
+        reservation.setClientNom(request.getClientNom());
+        reservation.setClientEmail(request.getClientEmail());
+        reservation.setDateDebut(request.getDateDebut());
+        reservation.setDateFin(request.getDateFin());
+        reservation.setMontantTotal(montantTotal);
+
+        return reservationRepository.save(reservation);
+    }
+
+    @Transactional
     public Reservation changerStatut(Long id, StatutReservation statut) {
         Reservation reservation = findById(id);
         reservation.setStatut(statut);
@@ -79,7 +110,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public void annuler(Long id) {
-        changerStatut(id, StatutReservation.ANNULEE);
+    public void supprimer(Long id) {
+        Reservation reservation = findById(id);
+        reservationRepository.delete(reservation);
     }
 }
