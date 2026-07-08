@@ -1,0 +1,5 @@
+# Configuration partagee par tous les microservices HotelBook
+app:
+  hotelbook:
+    nom-plateforme: "HotelBook"
+    copyright: "HotelBook (c) 2026"

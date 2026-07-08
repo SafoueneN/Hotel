@@ -1,0 +1,7 @@
+app:
+  hotelbook:
+    nom-plateforme: "HotelBook Reservations"
+
+reservation:
+  max-jours-avance: 365
+  min-jours-avant-arrivee: 0

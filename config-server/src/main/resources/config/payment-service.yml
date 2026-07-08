@@ -1,0 +1,6 @@
+app:
+  hotelbook:
+    nom-plateforme: "HotelBook Paiements"
+
+paiement:
+  taux-succes-simulation: 0.9

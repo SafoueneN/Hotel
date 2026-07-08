@@ -1,8 +1,9 @@
 const Paiement = require('../models/Paiement');
 const Notification = require('../models/Notification');
+const runtimeConfig = require('../config/runtimeConfig');
 
 function simulerTraitementPaiement() {
-  return Math.random() < 0.9 ? 'REUSSI' : 'ECHOUE';
+  return Math.random() < runtimeConfig.tauxSuccesSimulation ? 'REUSSI' : 'ECHOUE';
 }
 
 async function creerPaiement(req, res, next) {
