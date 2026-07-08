@@ -1,16 +1,18 @@
 const { Eureka } = require('eureka-js-client');
 
 function createEurekaClient(port) {
+  const hostName = process.env.EUREKA_INSTANCE_HOSTNAME || 'localhost';
+
   return new Eureka({
     instance: {
       app: 'payment-service',
       instanceId: `payment-service:${port}`,
-      hostName: 'localhost',
-      ipAddr: '127.0.0.1',
+      hostName,
+      ipAddr: hostName,
       port: { $: port, '@enabled': true },
       vipAddress: 'payment-service',
-      statusPageUrl: `http://localhost:${port}/health`,
-      healthCheckUrl: `http://localhost:${port}/health`,
+      statusPageUrl: `http://${hostName}:${port}/health`,
+      healthCheckUrl: `http://${hostName}:${port}/health`,
       dataCenterInfo: {
         '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
         name: 'MyOwn',

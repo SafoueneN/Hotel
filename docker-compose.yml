@@ -1,0 +1,148 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: hotelbook-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: reservationdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hotelbook-net
+
+  mongo:
+    image: mongo:7
+    container_name: hotelbook-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hotelbook-net
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: hotelbook-eureka-server
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8761/"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hotelbook-net
+
+  config-server:
+    build: ./config-server
+    container_name: hotelbook-config-server
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8888/application/default"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hotelbook-net
+
+  reservation-service:
+    build: ./reservation-service
+    container_name: hotelbook-reservation-service
+    environment:
+      SPRING_PROFILES_ACTIVE: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: reservationdb
+      DB_USER: root
+      DB_PASSWORD: root
+      EUREKA_URI: http://eureka-server:8761/eureka/
+      CONFIG_SERVER_URL: http://config-server:8888
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/api/hotels"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hotelbook-net
+
+  payment-service:
+    build: ./payment-service
+    container_name: hotelbook-payment-service
+    environment:
+      PORT: 8082
+      MONGO_URI: mongodb://mongo:27017/paymentdb
+      EUREKA_HOST: eureka-server
+      EUREKA_PORT: 8761
+      EUREKA_INSTANCE_HOSTNAME: payment-service
+      CONFIG_SERVER_URL: http://config-server:8888
+    ports:
+      - "8082:8082"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hotelbook-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: hotelbook-api-gateway
+    environment:
+      EUREKA_URI: http://eureka-server:8761/eureka/
+      CONFIG_SERVER_URL: http://config-server:8888
+    ports:
+      - "8090:8090"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      reservation-service:
+        condition: service_healthy
+      payment-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8090/gateway/info"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - hotelbook-net
+
+networks:
+  hotelbook-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  mongo-data:
