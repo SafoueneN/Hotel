@@ -6,9 +6,49 @@
   "variable": [
     { "key": "reservation_url", "value": "http://localhost:8081" },
     { "key": "payment_url", "value": "http://localhost:8082" },
-    { "key": "gateway_url", "value": "http://localhost:8090" }
+    { "key": "gateway_url", "value": "http://localhost:8090" },
+    { "key": "keycloak_url", "value": "http://localhost:8180" }
   ],
   "item": [
+    {
+      "name": "Auth (Keycloak)",
+      "item": [
+        {
+          "name": "Obtenir un token - ali (role CLIENT)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "url": "{{keycloak_url}}/realms/hotelbook/protocol/openid-connect/token",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "client_id", "value": "hotelbook-client" },
+                { "key": "grant_type", "value": "password" },
+                { "key": "username", "value": "ali" },
+                { "key": "password", "value": "ali123" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtenir un token - admin1 (role ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/x-www-form-urlencoded" }],
+            "url": "{{keycloak_url}}/realms/hotelbook/protocol/openid-connect/token",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "client_id", "value": "hotelbook-client" },
+                { "key": "grant_type", "value": "password" },
+                { "key": "username", "value": "admin1" },
+                { "key": "password", "value": "admin123" }
+              ]
+            }
+          }
+        }
+      ]
+    },
     {
       "name": "reservation-service",
       "item": [

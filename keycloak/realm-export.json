@@ -1,0 +1,50 @@
+{
+  "realm": "hotelbook",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "roles": {
+    "realm": [
+      { "name": "ADMIN", "description": "Administrateur HotelBook" },
+      { "name": "CLIENT", "description": "Client HotelBook" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "hotelbook-client",
+      "name": "HotelBook Client",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin1",
+      "enabled": true,
+      "email": "admin1@hotelbook.local",
+      "firstName": "Admin",
+      "lastName": "HotelBook",
+      "credentials": [
+        { "type": "password", "value": "admin123", "temporary": false }
+      ],
+      "realmRoles": ["ADMIN"]
+    },
+    {
+      "username": "ali",
+      "enabled": true,
+      "email": "ali@hotelbook.local",
+      "firstName": "Ali",
+      "lastName": "Test",
+      "credentials": [
+        { "type": "password", "value": "ali123", "temporary": false }
+      ],
+      "realmRoles": ["CLIENT"]
+    }
+  ]
+}

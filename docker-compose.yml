@@ -32,6 +32,22 @@ services:
     networks:
       - hotelbook-net
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: hotelbook-keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: http://keycloak:8080
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    networks:
+      - hotelbook-net
+
   eureka-server:
     build: ./eureka-server
     container_name: hotelbook-eureka-server
@@ -117,9 +133,11 @@ services:
   api-gateway:
     build: ./api-gateway
     container_name: hotelbook-api-gateway
+    restart: on-failure
     environment:
       EUREKA_URI: http://eureka-server:8761/eureka/
       CONFIG_SERVER_URL: http://config-server:8888
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/hotelbook
     ports:
       - "8090:8090"
     depends_on:
@@ -131,6 +149,8 @@ services:
         condition: service_healthy
       payment-service:
         condition: service_healthy
+      keycloak:
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8090/gateway/info"]
       interval: 5s
