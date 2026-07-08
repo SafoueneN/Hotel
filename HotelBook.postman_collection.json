@@ -193,6 +193,21 @@
             { "name": "Lister les paiements d'une reservation", "request": { "method": "GET", "url": "{{payment_url}}/api/paiements/reservation/1" } },
             { "name": "Obtenir un paiement par id", "request": { "method": "GET", "url": "{{payment_url}}/api/paiements/REMPLACER_ID" } },
             {
+              "name": "[SYNC+ASYNC] Payer une reservation (appelle reservation-service en sync, confirme en async via RabbitMQ)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{access_token}}" }
+                ],
+                "url": "{{gateway_url}}/api/paiements/reservation/1/payer",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"methode\": \"CARTE\"\n}"
+                }
+              }
+            },
+            {
               "name": "Creer un paiement",
               "request": {
                 "method": "POST",

@@ -1,9 +1,60 @@
 const Paiement = require('../models/Paiement');
 const Notification = require('../models/Notification');
 const runtimeConfig = require('../config/runtimeConfig');
+const { fetchReservation } = require('../config/reservationClient');
+const { publierPaiementReussi } = require('../config/rabbitmq');
 
 function simulerTraitementPaiement() {
   return Math.random() < runtimeConfig.tauxSuccesSimulation ? 'REUSSI' : 'ECHOUE';
+}
+
+// Scenario de communication inter-microservices :
+// 1) appel SYNCHRONE (REST) vers reservation-service pour recuperer les details de la reservation
+// 2) si le paiement reussit, publication ASYNCHRONE (RabbitMQ) pour confirmer la reservation
+async function payerReservation(req, res, next) {
+  try {
+    const { reservationId } = req.params;
+    const { methode } = req.body;
+
+    const reservation = await fetchReservation(reservationId);
+    if (!reservation) {
+      return res.status(404).json({ message: `Réservation ${reservationId} introuvable` });
+    }
+    if (reservation.statut !== 'EN_ATTENTE') {
+      return res.status(409).json({ message: `Réservation ${reservationId} déjà ${reservation.statut}` });
+    }
+
+    const statut = simulerTraitementPaiement();
+
+    const paiement = await Paiement.create({
+      reservationId,
+      clientEmail: reservation.clientEmail,
+      montant: reservation.montantTotal,
+      methode: methode || 'CARTE',
+      statut,
+    });
+
+    const notification = await Notification.create({
+      destinataire: reservation.clientEmail,
+      reservationId,
+      sujet: statut === 'REUSSI' ? 'Paiement confirmé' : 'Échec du paiement',
+      message:
+        statut === 'REUSSI'
+          ? `Votre paiement de ${reservation.montantTotal} DH pour la réservation #${reservationId} a été accepté. Votre réservation sera confirmée sous peu.`
+          : `Le paiement de ${reservation.montantTotal} DH pour la réservation #${reservationId} a échoué. Veuillez réessayer.`,
+      envoyee: true,
+    });
+
+    console.log(`[payment-service] Notification envoyée à ${reservation.clientEmail} : ${notification.sujet}`);
+
+    if (statut === 'REUSSI') {
+      publierPaiementReussi(Number(reservationId));
+    }
+
+    return res.status(201).json(paiement);
+  } catch (err) {
+    next(err);
+  }
 }
 
 async function creerPaiement(req, res, next) {
@@ -144,4 +195,5 @@ module.exports = {
   updatePaiement,
   deletePaiement,
   getStatistiques,
+  payerReservation,
 };

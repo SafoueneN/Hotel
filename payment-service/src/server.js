@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const createEurekaClient = require('./config/eureka');
 const fetchRemoteConfig = require('./config/configServer');
 const runtimeConfig = require('./config/runtimeConfig');
+const { connectRabbitMQ } = require('./config/rabbitmq');
 const paiementRoutes = require('./routes/paiementRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 
@@ -50,6 +51,12 @@ async function demarrer() {
   }
 
   await connectDB();
+
+  try {
+    await connectRabbitMQ();
+  } catch (err) {
+    console.warn('[payment-service] RabbitMQ injoignable au démarrage, nouvelle tentative au premier paiement', err.message);
+  }
 
   app.listen(PORT, () => {
     console.log(`[payment-service] Démarré sur le port ${PORT}`);
