@@ -18,6 +18,9 @@ export default function App() {
           {isAdmin && <Route path="/admin" element={<AdminStatsPage />} />}
         </Routes>
       </main>
+      <footer className="app-footer">
+        HotelBook — mini-projet microservices (Spring Boot · Node.js · Eureka · Gateway · Keycloak · RabbitMQ)
+      </footer>
     </div>
   );
 }

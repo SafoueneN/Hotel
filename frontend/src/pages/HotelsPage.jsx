@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 import apiClient from '../api/client';
 import { useAuth } from '../useAuth';
 import BookingModal from '../components/BookingModal';
+import EmptyState from '../components/EmptyState';
+import SkeletonGrid from '../components/SkeletonGrid';
+import { IconSearch, IconMapPin, IconUsers, IconInbox, IconCalendar } from '../components/icons';
+import { coverGradientFor } from '../utils/cover';
 
 export default function HotelsPage() {
   const { authenticated, login } = useAuth();
@@ -12,6 +16,7 @@ export default function HotelsPage() {
   const [dateFin, setDateFin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
   const [chambreAReserver, setChambreAReserver] = useState(null);
 
   useEffect(() => {
@@ -29,6 +34,7 @@ export default function HotelsPage() {
       setError('Veuillez renseigner la ville et les dates');
       return;
     }
+    setSearching(true);
     try {
       const res = await apiClient.get('/api/chambres/disponibles/recherche', {
         params: { ville, dateDebut, dateFin },
@@ -36,6 +42,8 @@ export default function HotelsPage() {
       setSearchResults(res.data);
     } catch {
       setError('Erreur lors de la recherche de disponibilités');
+    } finally {
+      setSearching(false);
     }
   }
 
@@ -55,71 +63,122 @@ export default function HotelsPage() {
   }
 
   return (
-    <div className="page">
-      <h1>Nos hôtels</h1>
+    <div>
+      <div className="hero">
+        <div className="hero-inner">
+          <h1>Trouvez votre prochain séjour</h1>
+          <p className="lead">Comparez les chambres disponibles dans nos hôtels partenaires et réservez en quelques secondes.</p>
 
-      <form className="search-form" onSubmit={rechercherDisponibilites}>
-        <input
-          type="text"
-          placeholder="Ville (ex: Marrakech)"
-          value={ville}
-          onChange={(e) => setVille(e.target.value)}
-        />
-        <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />
-        <input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
-        <button type="submit" className="btn btn-primary">Rechercher des disponibilités</button>
-        {searchResults && (
-          <button type="button" className="btn btn-ghost" onClick={reinitialiserRecherche}>
-            Réinitialiser
-          </button>
-        )}
-      </form>
+          <form className="search-form" onSubmit={rechercherDisponibilites}>
+            <div className="field">
+              <IconMapPin />
+              <input
+                type="text"
+                placeholder="Ville (ex: Marrakech)"
+                value={ville}
+                onChange={(e) => setVille(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <IconCalendar />
+              <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />
+            </div>
+            <div className="field">
+              <IconCalendar />
+              <input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
+            </div>
+            <button type="submit" className="btn btn-primary" disabled={searching}>
+              <IconSearch /> {searching ? 'Recherche...' : 'Rechercher'}
+            </button>
+            {searchResults && (
+              <button type="button" className="btn btn-ghost" onClick={reinitialiserRecherche}>
+                Réinitialiser
+              </button>
+            )}
+          </form>
+        </div>
+      </div>
 
-      {error && <p className="error">{error}</p>}
-      {loading && <p>Chargement...</p>}
+      <div className="page">
+        {error && <p className="error">{error}</p>}
 
-      {searchResults ? (
-        <section>
-          <h2>Chambres disponibles à {ville} du {dateDebut} au {dateFin}</h2>
-          {searchResults.length === 0 && <p>Aucune chambre disponible pour cette période.</p>}
-          <div className="card-grid">
-            {searchResults.map((chambre) => (
-              <div className="card" key={chambre.id}>
-                <h3>{chambre.hotel.nom} — Chambre {chambre.numero}</h3>
-                <p>{chambre.type} · {chambre.capacite} pers. · {chambre.prixParNuit} DH/nuit</p>
-                <button className="btn btn-primary" onClick={() => onReserverClick(chambre, chambre.hotel)}>
-                  Réserver
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : (
-        <section>
-          {hotels.map((hotel) => (
-            <div key={hotel.id} className="hotel-block">
-              <h2>{hotel.nom} — {hotel.ville}</h2>
-              <p className="muted">{hotel.description}</p>
+        {loading && <SkeletonGrid count={4} />}
+
+        {!loading && searchResults ? (
+          <section>
+            <div className="hotel-block-header">
+              <h2>Chambres disponibles à {ville}</h2>
+              <span className="muted">du {dateDebut} au {dateFin}</span>
+            </div>
+            {searchResults.length === 0 ? (
+              <EmptyState icon={<IconInbox />} title="Aucune chambre disponible">
+                Essayez d'autres dates ou une autre ville.
+              </EmptyState>
+            ) : (
               <div className="card-grid">
-                {hotel.chambres?.map((chambre) => (
+                {searchResults.map((chambre) => (
                   <div className="card" key={chambre.id}>
-                    <h3>Chambre {chambre.numero}</h3>
-                    <p>{chambre.type} · {chambre.capacite} pers. · {chambre.prixParNuit} DH/nuit</p>
-                    <p className={chambre.disponible ? 'tag tag-ok' : 'tag tag-ko'}>
-                      {chambre.disponible ? 'Disponible' : 'Indisponible'}
-                    </p>
-                    {chambre.disponible && (
-                      <button className="btn btn-primary" onClick={() => onReserverClick(chambre, hotel)}>
-                        Réserver
-                      </button>
-                    )}
+                    <div className="card-cover" style={{ background: coverGradientFor(chambre.hotel.id) }}>
+                      {chambre.hotel.nom}
+                    </div>
+                    <div className="card-body">
+                      <h3>Chambre {chambre.numero}</h3>
+                      <div className="card-meta">
+                        <span><IconUsers /> {chambre.capacite} pers.</span>
+                        <span>{chambre.type}</span>
+                      </div>
+                      <div className="card-footer">
+                        <span className="card-price">{chambre.prixParNuit} DH <small>/ nuit</small></span>
+                        <button className="btn btn-primary btn-sm" onClick={() => onReserverClick(chambre, chambre.hotel)}>
+                          Réserver
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
-          ))}
-        </section>
-      )}
+            )}
+          </section>
+        ) : (
+          !loading && (
+            <section>
+              {hotels.map((hotel) => (
+                <div key={hotel.id} className="hotel-block">
+                  <div className="hotel-cover" style={{ background: coverGradientFor(hotel.id) }}>
+                    <h2>{hotel.nom}</h2>
+                    <div className="hotel-cover-meta"><IconMapPin /> {hotel.ville}</div>
+                    <p>{hotel.description}</p>
+                  </div>
+                  <div className="card-grid">
+                    {hotel.chambres?.map((chambre) => (
+                      <div className="card" key={chambre.id}>
+                        <div className="card-body">
+                          <h3>Chambre {chambre.numero}</h3>
+                          <div className="card-meta">
+                            <span><IconUsers /> {chambre.capacite} pers.</span>
+                            <span>{chambre.type}</span>
+                          </div>
+                          <span className={chambre.disponible ? 'tag tag-ok' : 'tag tag-ko'}>
+                            {chambre.disponible ? 'Disponible' : 'Indisponible'}
+                          </span>
+                          <div className="card-footer">
+                            <span className="card-price">{chambre.prixParNuit} DH <small>/ nuit</small></span>
+                            {chambre.disponible && (
+                              <button className="btn btn-primary btn-sm" onClick={() => onReserverClick(chambre, hotel)}>
+                                Réserver
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </section>
+          )
+        )}
+      </div>
 
       {chambreAReserver && (
         <BookingModal

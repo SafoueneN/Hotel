@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import apiClient from '../api/client';
 import { useAuth } from '../useAuth';
+import { IconCalendar } from './icons';
 
 export default function BookingModal({ chambre, hotel, dateDebutInitiale, dateFinInitiale, onClose }) {
   const { username, email } = useAuth();
@@ -33,9 +34,10 @@ export default function BookingModal({ chambre, hotel, dateDebutInitiale, dateFi
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close" onClick={onClose}>×</button>
-        <h2>Réserver — {hotel.nom}, chambre {chambre.numero}</h2>
-        <p className="muted">{chambre.type} · {chambre.prixParNuit} DH/nuit</p>
+        <button className="modal-close" onClick={onClose} aria-label="Fermer">×</button>
+        <h2>Réserver</h2>
+        <p className="muted">{hotel.nom} · chambre {chambre.numero} · {chambre.type}</p>
+        <p className="card-price" style={{ marginTop: 8 }}>{chambre.prixParNuit} DH <small>/ nuit</small></p>
 
         {succes ? (
           <div>
@@ -45,11 +47,11 @@ export default function BookingModal({ chambre, hotel, dateDebutInitiale, dateFi
         ) : (
           <form onSubmit={handleSubmit}>
             <label>
-              Date d'arrivée
+              <span><IconCalendar style={{ width: 13, height: 13, verticalAlign: -2 }} /> Date d'arrivée</span>
               <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} required />
             </label>
             <label>
-              Date de départ
+              <span><IconCalendar style={{ width: 13, height: 13, verticalAlign: -2 }} /> Date de départ</span>
               <input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} required />
             </label>
             {error && <p className="error">{error}</p>}

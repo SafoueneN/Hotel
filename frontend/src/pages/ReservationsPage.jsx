@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import apiClient from '../api/client';
 import { useAuth } from '../useAuth';
+import EmptyState from '../components/EmptyState';
+import { IconCreditCard, IconTrash, IconInbox } from '../components/icons';
 
 const STATUT_LABELS = {
   EN_ATTENTE: { label: 'En attente de paiement', className: 'tag tag-warn' },
@@ -61,13 +63,22 @@ export default function ReservationsPage() {
   return (
     <div className="page">
       <h1>{isAdmin ? 'Toutes les réservations' : 'Mes réservations'}</h1>
+      <p className="page-intro">
+        {isAdmin ? 'Vue d\'ensemble de toutes les réservations clients.' : 'Suivez et payez vos réservations en cours.'}
+      </p>
       {error && <p className="error">{error}</p>}
       {message && <p className="success">{message}</p>}
-      {loading && <p>Chargement...</p>}
-      {!loading && reservations.length === 0 && <p>Aucune réservation pour le moment.</p>}
 
-      <div className="table-wrapper">
-        {reservations.length > 0 && (
+      {loading && <div className="skeleton" style={{ height: 220, borderRadius: 'var(--radius-md)' }} />}
+
+      {!loading && reservations.length === 0 && (
+        <EmptyState icon={<IconInbox />} title="Aucune réservation pour le moment">
+          Réservez une chambre depuis la page Hôtels pour la voir apparaître ici.
+        </EmptyState>
+      )}
+
+      {!loading && reservations.length > 0 && (
+        <div className="table-wrapper">
           <table>
             <thead>
               <tr>
@@ -98,12 +109,12 @@ export default function ReservationsPage() {
                           disabled={paiementEnCours === r.id}
                           onClick={() => payer(r.id)}
                         >
-                          {paiementEnCours === r.id ? 'Traitement...' : 'Payer'}
+                          <IconCreditCard /> {paiementEnCours === r.id ? 'Traitement...' : 'Payer'}
                         </button>
                       )}
                       {isAdmin && (
                         <button className="btn btn-danger btn-sm" onClick={() => supprimer(r.id)}>
-                          Supprimer
+                          <IconTrash /> Supprimer
                         </button>
                       )}
                     </td>
@@ -112,8 +123,8 @@ export default function ReservationsPage() {
               })}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
