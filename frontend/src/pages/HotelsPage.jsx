@@ -4,8 +4,10 @@ import { useAuth } from '../useAuth';
 import BookingModal from '../components/BookingModal';
 import EmptyState from '../components/EmptyState';
 import SkeletonGrid from '../components/SkeletonGrid';
-import { IconSearch, IconMapPin, IconUsers, IconInbox, IconCalendar } from '../components/icons';
+import { IconSearch, IconMapPin, IconUsers, IconInbox, IconCalendar, IconCreditCard, IconBed } from '../components/icons';
+import { IllustrationHero, IllustrationEmpty } from '../components/illustrations';
 import { coverGradientFor } from '../utils/cover';
+import { roomTypeColor } from '../utils/roomType';
 
 export default function HotelsPage() {
   const { authenticated, login } = useAuth();
@@ -62,40 +64,52 @@ export default function HotelsPage() {
     setChambreAReserver({ chambre, hotel, dateDebut, dateFin });
   }
 
+  const nombreHotels = hotels.length;
+
   return (
     <div>
       <div className="hero">
         <div className="hero-inner">
-          <h1>Trouvez votre prochain séjour</h1>
-          <p className="lead">Comparez les chambres disponibles dans nos hôtels partenaires et réservez en quelques secondes.</p>
+          <div className="hero-copy">
+            <h1>Trouvez votre prochain séjour</h1>
+            <p className="lead">Comparez les chambres disponibles dans nos hôtels partenaires et réservez en quelques secondes.</p>
 
-          <form className="search-form" onSubmit={rechercherDisponibilites}>
-            <div className="field">
-              <IconMapPin />
-              <input
-                type="text"
-                placeholder="Ville (ex: Marrakech)"
-                value={ville}
-                onChange={(e) => setVille(e.target.value)}
-              />
-            </div>
-            <div className="field">
-              <IconCalendar />
-              <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />
-            </div>
-            <div className="field">
-              <IconCalendar />
-              <input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
-            </div>
-            <button type="submit" className="btn btn-primary" disabled={searching}>
-              <IconSearch /> {searching ? 'Recherche...' : 'Rechercher'}
-            </button>
-            {searchResults && (
-              <button type="button" className="btn btn-ghost" onClick={reinitialiserRecherche}>
-                Réinitialiser
+            <form className="search-form" onSubmit={rechercherDisponibilites}>
+              <div className="field">
+                <IconMapPin />
+                <input
+                  type="text"
+                  placeholder="Ville (ex: Marrakech)"
+                  value={ville}
+                  onChange={(e) => setVille(e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <IconCalendar />
+                <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} />
+              </div>
+              <div className="field">
+                <IconCalendar />
+                <input type="date" value={dateFin} onChange={(e) => setDateFin(e.target.value)} />
+              </div>
+              <button type="submit" className="btn btn-primary" disabled={searching}>
+                <IconSearch /> {searching ? 'Recherche...' : 'Rechercher'}
               </button>
-            )}
-          </form>
+              {searchResults && (
+                <button type="button" className="btn btn-ghost" onClick={reinitialiserRecherche}>
+                  Réinitialiser
+                </button>
+              )}
+            </form>
+
+            <div className="trust-bar">
+              <span><IconBed /> {nombreHotels || ''} hôtels partenaires</span>
+              <span><IconCreditCard /> Paiement sécurisé</span>
+              <span><IconUsers /> Confirmation automatisée</span>
+            </div>
+          </div>
+
+          <IllustrationHero className="hero-illustration" aria-hidden="true" />
         </div>
       </div>
 
@@ -111,7 +125,7 @@ export default function HotelsPage() {
               <span className="muted">du {dateDebut} au {dateFin}</span>
             </div>
             {searchResults.length === 0 ? (
-              <EmptyState icon={<IconInbox />} title="Aucune chambre disponible">
+              <EmptyState icon={<IllustrationEmpty style={{ width: 120, height: 96, color: 'var(--text-muted)' }} />} title="Aucune chambre disponible">
                 Essayez d'autres dates ou une autre ville.
               </EmptyState>
             ) : (
@@ -121,11 +135,12 @@ export default function HotelsPage() {
                     <div className="card-cover" style={{ background: coverGradientFor(chambre.hotel.id) }}>
                       {chambre.hotel.nom}
                     </div>
+                    <div className="card-room-accent" style={{ '--room-color': roomTypeColor(chambre.type) }} />
                     <div className="card-body">
                       <h3>Chambre {chambre.numero}</h3>
                       <div className="card-meta">
                         <span><IconUsers /> {chambre.capacite} pers.</span>
-                        <span>{chambre.type}</span>
+                        <span className="room-type-chip" style={{ '--room-color': roomTypeColor(chambre.type) }}>{chambre.type}</span>
                       </div>
                       <div className="card-footer">
                         <span className="card-price">{chambre.prixParNuit} DH <small>/ nuit</small></span>
@@ -152,11 +167,12 @@ export default function HotelsPage() {
                   <div className="card-grid">
                     {hotel.chambres?.map((chambre) => (
                       <div className="card" key={chambre.id}>
+                        <div className="card-room-accent" style={{ '--room-color': roomTypeColor(chambre.type) }} />
                         <div className="card-body">
                           <h3>Chambre {chambre.numero}</h3>
                           <div className="card-meta">
                             <span><IconUsers /> {chambre.capacite} pers.</span>
-                            <span>{chambre.type}</span>
+                            <span className="room-type-chip" style={{ '--room-color': roomTypeColor(chambre.type) }}>{chambre.type}</span>
                           </div>
                           <span className={chambre.disponible ? 'tag tag-ok' : 'tag tag-ko'}>
                             {chambre.disponible ? 'Disponible' : 'Indisponible'}

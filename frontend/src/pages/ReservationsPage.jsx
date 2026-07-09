@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import apiClient from '../api/client';
 import { useAuth } from '../useAuth';
 import EmptyState from '../components/EmptyState';
-import { IconCreditCard, IconTrash, IconInbox } from '../components/icons';
+import { IconCreditCard, IconTrash } from '../components/icons';
+import { IllustrationEmpty } from '../components/illustrations';
 
 const STATUT_LABELS = {
   EN_ATTENTE: { label: 'En attente de paiement', className: 'tag tag-warn' },
@@ -72,7 +73,7 @@ export default function ReservationsPage() {
       {loading && <div className="skeleton" style={{ height: 220, borderRadius: 'var(--radius-md)' }} />}
 
       {!loading && reservations.length === 0 && (
-        <EmptyState icon={<IconInbox />} title="Aucune réservation pour le moment">
+        <EmptyState icon={<IllustrationEmpty style={{ width: 120, height: 96, color: 'var(--text-muted)' }} />} title="Aucune réservation pour le moment">
           Réservez une chambre depuis la page Hôtels pour la voir apparaître ici.
         </EmptyState>
       )}

@@ -203,13 +203,22 @@ main {
     radial-gradient(1200px 400px at 15% -10%, var(--accent-wash), transparent),
     var(--surface-2);
   border-bottom: 1px solid var(--border);
-  padding: 56px 32px 40px;
+  padding: 56px 32px 0;
   margin-bottom: 8px;
+  overflow: hidden;
 }
 
 .hero-inner {
   max-width: 1100px;
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 24px;
+}
+
+.hero-copy {
+  padding-bottom: 40px;
 }
 
 .hero h1 {
@@ -222,6 +231,48 @@ main {
   font-size: 16px;
   margin: 0 0 28px;
   max-width: 560px;
+}
+
+.hero-illustration {
+  width: 100%;
+  height: auto;
+  color: var(--text-primary);
+  justify-self: end;
+  align-self: flex-end;
+  max-width: 380px;
+}
+
+@media (max-width: 860px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+  }
+  .hero-illustration {
+    display: none;
+  }
+}
+
+.trust-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  padding: 16px 0 22px;
+  margin-top: 20px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.trust-bar span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.trust-bar svg {
+  width: 15px;
+  height: 15px;
+  color: var(--accent);
 }
 
 /* ---------- Buttons ---------- */
@@ -471,6 +522,26 @@ main {
   font-size: 12px;
 }
 
+.card-room-accent {
+  height: 4px;
+  background: var(--room-color, var(--accent));
+}
+
+.room-type-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+}
+
+.room-type-chip::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--room-color, var(--accent));
+}
+
 .card-footer {
   margin-top: auto;
   padding-top: 10px;
@@ -484,19 +555,31 @@ main {
 
 .hotel-cover {
   border-radius: var(--radius-lg);
-  padding: 22px 26px;
+  padding: 26px 28px;
   color: #fff;
   margin-bottom: 16px;
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
+  min-height: 118px;
+}
+
+.hotel-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+  background-position: 0 0;
+  mask-image: linear-gradient(115deg, black 20%, transparent 75%);
+  -webkit-mask-image: linear-gradient(115deg, black 20%, transparent 75%);
 }
 
 .hotel-cover::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(320px 160px at 90% 0%, rgba(255, 255, 255, 0.18), transparent);
+  background: radial-gradient(360px 200px at 95% -20%, rgba(255, 255, 255, 0.22), transparent);
 }
 
 .hotel-cover h2 {
@@ -799,4 +882,29 @@ td.actions {
   text-align: center;
   color: var(--text-muted);
   font-size: 12.5px;
+}
+
+/* ---------- Entrance animation ---------- */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card, .hotel-cover, .stat-tile, .empty-state, .table-wrapper {
+  animation: fadeUp 0.45s var(--ease) both;
+}
+
+.card-grid .card:nth-child(2) { animation-delay: 0.05s; }
+.card-grid .card:nth-child(3) { animation-delay: 0.1s; }
+.card-grid .card:nth-child(4) { animation-delay: 0.15s; }
+.card-grid .card:nth-child(n+5) { animation-delay: 0.2s; }
+
+.kpi-row .stat-tile:nth-child(2) { animation-delay: 0.06s; }
+.kpi-row .stat-tile:nth-child(3) { animation-delay: 0.12s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .hotel-cover, .stat-tile, .empty-state, .table-wrapper, .modal, .modal-overlay {
+    animation: none !important;
+  }
 }
