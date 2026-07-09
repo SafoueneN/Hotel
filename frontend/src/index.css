@@ -199,66 +199,54 @@ main {
 /* ---------- Hero ---------- */
 
 .hero {
-  background:
-    radial-gradient(1200px 400px at 15% -10%, var(--accent-wash), transparent),
-    var(--surface-2);
-  border-bottom: 1px solid var(--border);
-  padding: 56px 32px 0;
+  position: relative;
+  background-size: cover;
+  background-position: center 65%;
+  padding: 76px 32px 96px;
   margin-bottom: 8px;
   overflow: hidden;
+  isolation: isolate;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(10, 12, 16, 0.55) 0%, rgba(10, 12, 16, 0.35) 45%, var(--page) 100%);
 }
 
 .hero-inner {
   max-width: 1100px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  align-items: center;
-  gap: 24px;
 }
 
 .hero-copy {
-  padding-bottom: 40px;
+  padding-bottom: 8px;
 }
 
 .hero h1 {
   font-size: 38px;
   padding-top: 0;
+  color: #fff;
 }
 
 .hero p.lead {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.88);
   font-size: 16px;
   margin: 0 0 28px;
   max-width: 560px;
-}
-
-.hero-illustration {
-  width: 100%;
-  height: auto;
-  color: var(--text-primary);
-  justify-self: end;
-  align-self: flex-end;
-  max-width: 380px;
-}
-
-@media (max-width: 860px) {
-  .hero-inner {
-    grid-template-columns: 1fr;
-  }
-  .hero-illustration {
-    display: none;
-  }
 }
 
 .trust-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 22px;
-  padding: 16px 0 22px;
+  padding: 16px 0 4px;
   margin-top: 20px;
-  border-top: 1px solid var(--border);
-  color: var(--text-secondary);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 13px;
   font-weight: 600;
 }
@@ -272,7 +260,7 @@ main {
 .trust-bar svg {
   width: 15px;
   height: 15px;
-  color: var(--accent);
+  color: #fff;
 }
 
 /* ---------- Buttons ---------- */
@@ -471,14 +459,35 @@ main {
 }
 
 .card-cover {
-  height: 64px;
+  height: 96px;
   display: flex;
   align-items: flex-end;
   padding: 10px 14px;
-  color: rgba(255, 255, 255, 0.92);
+  color: #fff;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.card-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.card-cover span {
+  position: relative;
+}
+
+.card-photo {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
 }
 
 .card-body {
@@ -561,25 +570,19 @@ main {
   box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
-  min-height: 118px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background-size: cover;
+  background-position: center;
 }
 
 .hotel-cover::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1.5px, transparent 1.5px);
-  background-size: 16px 16px;
-  background-position: 0 0;
-  mask-image: linear-gradient(115deg, black 20%, transparent 75%);
-  -webkit-mask-image: linear-gradient(115deg, black 20%, transparent 75%);
-}
-
-.hotel-cover::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(360px 200px at 95% -20%, rgba(255, 255, 255, 0.22), transparent);
+  background: linear-gradient(180deg, rgba(10, 12, 16, 0.05) 0%, rgba(10, 12, 16, 0.75) 100%);
 }
 
 .hotel-cover h2 {
@@ -746,6 +749,7 @@ td.actions {
   position: relative;
   box-shadow: var(--shadow-lg);
   animation: modalIn 0.18s var(--ease);
+  overflow: hidden;
 }
 
 @keyframes modalIn {
@@ -753,15 +757,23 @@ td.actions {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+.modal-photo {
+  width: calc(100% + 56px);
+  height: 170px;
+  object-fit: cover;
+  display: block;
+  margin: -28px -28px 16px;
+}
+
 .modal-close {
   position: absolute;
   top: 14px;
   right: 14px;
-  background: none;
+  background: rgba(0, 0, 0, 0.4);
   border: none;
   font-size: 20px;
   line-height: 1;
-  color: var(--text-muted);
+  color: #fff;
   cursor: pointer;
   width: 28px;
   height: 28px;
@@ -769,11 +781,11 @@ td.actions {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
 }
 
 .modal-close:hover {
-  background: var(--page);
-  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.6);
 }
 
 .modal form {
@@ -907,4 +919,51 @@ td.actions {
   .card, .hotel-cover, .stat-tile, .empty-state, .table-wrapper, .modal, .modal-overlay {
     animation: none !important;
   }
+}
+
+/* ---------- Misc ---------- */
+
+.link-button {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.link-button:hover {
+  color: var(--accent);
+}
+
+.modal-wide {
+  width: 480px;
+}
+
+.credits-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.credits-list li {
+  font-size: 13px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.credits-list a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.credits-list a:hover {
+  text-decoration: underline;
 }

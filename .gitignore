@@ -2,7 +2,7 @@ target/
 node_modules/
 *.log
 .env
-data/
+/data/
 .idea/
 .vscode/
 *.class

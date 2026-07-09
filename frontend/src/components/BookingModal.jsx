@@ -2,6 +2,7 @@ import { useState } from 'react';
 import apiClient from '../api/client';
 import { useAuth } from '../useAuth';
 import { IconCalendar } from './icons';
+import { roomTypeImage } from '../utils/photos';
 
 export default function BookingModal({ chambre, hotel, dateDebutInitiale, dateFinInitiale, onClose }) {
   const { username, email } = useAuth();
@@ -35,6 +36,7 @@ export default function BookingModal({ chambre, hotel, dateDebutInitiale, dateFi
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose} aria-label="Fermer">×</button>
+        <img className="modal-photo" src={roomTypeImage(chambre.type)} alt={`Chambre ${chambre.type.toLowerCase()}`} />
         <h2>Réserver</h2>
         <p className="muted">{hotel.nom} · chambre {chambre.numero} · {chambre.type}</p>
         <p className="card-price" style={{ marginTop: 8 }}>{chambre.prixParNuit} DH <small>/ nuit</small></p>

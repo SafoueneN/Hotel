@@ -4,9 +4,9 @@ import { useAuth } from '../useAuth';
 import BookingModal from '../components/BookingModal';
 import EmptyState from '../components/EmptyState';
 import SkeletonGrid from '../components/SkeletonGrid';
-import { IconSearch, IconMapPin, IconUsers, IconInbox, IconCalendar, IconCreditCard, IconBed } from '../components/icons';
-import { IllustrationHero, IllustrationEmpty } from '../components/illustrations';
-import { coverGradientFor } from '../utils/cover';
+import { IconSearch, IconMapPin, IconUsers, IconCalendar, IconCreditCard, IconBed } from '../components/icons';
+import { IllustrationEmpty } from '../components/illustrations';
+import { heroImage, hotelCoverImage, roomTypeImage } from '../utils/photos';
 import { roomTypeColor } from '../utils/roomType';
 
 export default function HotelsPage() {
@@ -68,7 +68,7 @@ export default function HotelsPage() {
 
   return (
     <div>
-      <div className="hero">
+      <div className="hero" style={{ backgroundImage: `url(${heroImage})` }}>
         <div className="hero-inner">
           <div className="hero-copy">
             <h1>Trouvez votre prochain séjour</h1>
@@ -108,8 +108,6 @@ export default function HotelsPage() {
               <span><IconUsers /> Confirmation automatisée</span>
             </div>
           </div>
-
-          <IllustrationHero className="hero-illustration" aria-hidden="true" />
         </div>
       </div>
 
@@ -132,9 +130,10 @@ export default function HotelsPage() {
               <div className="card-grid">
                 {searchResults.map((chambre) => (
                   <div className="card" key={chambre.id}>
-                    <div className="card-cover" style={{ background: coverGradientFor(chambre.hotel.id) }}>
-                      {chambre.hotel.nom}
+                    <div className="card-cover" style={{ backgroundImage: `url(${hotelCoverImage(chambre.hotel.nom)})` }}>
+                      <span>{chambre.hotel.nom}</span>
                     </div>
+                    <img className="card-photo" src={roomTypeImage(chambre.type)} alt={`Chambre ${chambre.type.toLowerCase()}`} />
                     <div className="card-room-accent" style={{ '--room-color': roomTypeColor(chambre.type) }} />
                     <div className="card-body">
                       <h3>Chambre {chambre.numero}</h3>
@@ -159,7 +158,7 @@ export default function HotelsPage() {
             <section>
               {hotels.map((hotel) => (
                 <div key={hotel.id} className="hotel-block">
-                  <div className="hotel-cover" style={{ background: coverGradientFor(hotel.id) }}>
+                  <div className="hotel-cover" style={{ backgroundImage: `url(${hotelCoverImage(hotel.nom)})` }}>
                     <h2>{hotel.nom}</h2>
                     <div className="hotel-cover-meta"><IconMapPin /> {hotel.ville}</div>
                     <p>{hotel.description}</p>
@@ -167,6 +166,7 @@ export default function HotelsPage() {
                   <div className="card-grid">
                     {hotel.chambres?.map((chambre) => (
                       <div className="card" key={chambre.id}>
+                        <img className="card-photo" src={roomTypeImage(chambre.type)} alt={`Chambre ${chambre.type.toLowerCase()}`} />
                         <div className="card-room-accent" style={{ '--room-color': roomTypeColor(chambre.type) }} />
                         <div className="card-body">
                           <h3>Chambre {chambre.numero}</h3>
