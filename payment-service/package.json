@@ -13,7 +13,6 @@
   "description": "",
   "dependencies": {
     "amqplib": "^2.0.1",
-    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "eureka-js-client": "^4.5.0",
     "express": "^5.2.1",

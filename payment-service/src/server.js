@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
 const connectDB = require('./config/db');
 const createEurekaClient = require('./config/eureka');
 const fetchRemoteConfig = require('./config/configServer');
@@ -11,7 +10,6 @@ const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
 
 app.get('/health', (req, res) => {
