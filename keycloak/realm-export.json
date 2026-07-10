@@ -45,6 +45,17 @@
         { "type": "password", "value": "ali123", "temporary": false }
       ],
       "realmRoles": ["CLIENT"]
+    },
+    {
+      "username": "safouene",
+      "enabled": true,
+      "email": "safouene@hotelbook.local",
+      "firstName": "Safouene",
+      "lastName": "Test",
+      "credentials": [
+        { "type": "password", "value": "safouene123", "temporary": false }
+      ],
+      "realmRoles": ["CLIENT"]
     }
   ]
 }
