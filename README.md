@@ -88,6 +88,11 @@ Une collection est fournie : `HotelBook.postman_collection.json` (inclut la réc
 - **Émetteur JWT** : Keycloak est configuré avec un hostname fixe (`http://localhost:8180`) afin que le claim `iss` du token reste identique quel que soit le point d'accès. La Gateway récupère les clés publiques via le réseau Docker interne (`jwk-set-uri`) mais valide l'émetteur externe — nécessaire car navigateur et conteneurs n'accèdent pas à Keycloak par le même chemin réseau.
 - **Développement local sans Docker** : chaque service Spring a un profil `dev` autonome (H2 en mémoire) ; le frontend peut tourner via `npm run dev` (Vite, port 5173) directement contre les mêmes services.
 
+## Git et documentation
+
+Voir [`GIT_ET_DOCUMENTATION.md`](GIT_ET_DOCUMENTATION.md) pour l'historique détaillé des
+commits et l'inventaire de la documentation du projet.
+
 ## Structure du dépôt
 
 ```
