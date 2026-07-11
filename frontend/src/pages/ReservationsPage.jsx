@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import apiClient from '../api/client';
 import { useAuth } from '../useAuth';
 import EmptyState from '../components/EmptyState';
@@ -11,6 +11,83 @@ const STATUT_LABELS = {
   ANNULEE: { label: 'Annulée', className: 'tag tag-ko' },
 };
 
+const STATUT_PAIEMENT_LABELS = {
+  REUSSI: { label: 'Réussi', className: 'tag tag-ok' },
+  ECHOUE: { label: 'Échoué', className: 'tag tag-ko' },
+  REMBOURSE: { label: 'Remboursé', className: 'tag tag-warn' },
+};
+
+function formatMontant(n) {
+  return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n || 0) + ' DH';
+}
+
+// Details d'une reservation : illustre les 2 scenarios de communication
+// synchrone via Feign Client (reservation-service -> payment-service) :
+// GET /{id}/paiements (historique) et GET /{id}/recap (agregation).
+function DetailsReservation({ reservationId }) {
+  const [recap, setRecap] = useState(null);
+  const [paiements, setPaiements] = useState(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    Promise.all([
+      apiClient.get(`/api/reservations/${reservationId}/recap`),
+      apiClient.get(`/api/reservations/${reservationId}/paiements`),
+    ])
+      .then(([recapRes, paiementsRes]) => {
+        setRecap(recapRes.data);
+        setPaiements(paiementsRes.data);
+      })
+      .catch(() => setError('Impossible de charger le détail des paiements'));
+  }, [reservationId]);
+
+  if (error) return <p className="error" style={{ margin: 0 }}>{error}</p>;
+  if (!recap || !paiements) return <div className="skeleton" style={{ height: 60 }} />;
+
+  return (
+    <div className="details-paiement">
+      <div className="kpi-row" style={{ marginBottom: 14 }}>
+        <div className="stat-tile">
+          <span className="stat-label">Montant payé</span>
+          <span className="stat-value">{formatMontant(recap.montantPaye)}</span>
+        </div>
+        <div className="stat-tile">
+          <span className="stat-label">Reste à payer</span>
+          <span className="stat-value">{formatMontant(recap.resteAPayer)}</span>
+        </div>
+        <div className="stat-tile">
+          <span className="stat-label">Nombre de paiements</span>
+          <span className="stat-value">{recap.nombrePaiements}</span>
+        </div>
+      </div>
+
+      {paiements.length === 0 ? (
+        <p className="muted">Aucun paiement enregistré pour cette réservation.</p>
+      ) : (
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Statut</th><th>Méthode</th><th>Montant</th></tr>
+            </thead>
+            <tbody>
+              {paiements.map((p, i) => {
+                const meta = STATUT_PAIEMENT_LABELS[p.statut] || { label: p.statut, className: 'tag' };
+                return (
+                  <tr key={i}>
+                    <td><span className={meta.className}>{meta.label}</span></td>
+                    <td>{p.methode}</td>
+                    <td>{formatMontant(p.montant)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ReservationsPage() {
   const { email, isAdmin } = useAuth();
   const [reservations, setReservations] = useState([]);
@@ -18,6 +95,19 @@ export default function ReservationsPage() {
   const [loading, setLoading] = useState(true);
   const [paiementEnCours, setPaiementEnCours] = useState(null);
   const [message, setMessage] = useState('');
+  const [detailsOuverts, setDetailsOuverts] = useState(() => new Set());
+
+  function toggleDetails(reservationId) {
+    setDetailsOuverts((precedent) => {
+      const suivant = new Set(precedent);
+      if (suivant.has(reservationId)) {
+        suivant.delete(reservationId);
+      } else {
+        suivant.add(reservationId);
+      }
+      return suivant;
+    });
+  }
 
   const charger = useCallback(() => {
     setLoading(true);
@@ -95,31 +185,44 @@ export default function ReservationsPage() {
             <tbody>
               {reservations.map((r) => {
                 const statut = STATUT_LABELS[r.statut] || { label: r.statut, className: 'tag' };
+                const ouvert = detailsOuverts.has(r.id);
                 return (
-                  <tr key={r.id}>
-                    {isAdmin && <td>{r.clientNom} <span className="muted">({r.clientEmail})</span></td>}
-                    <td>{r.chambre?.numero}</td>
-                    <td>{r.chambre?.hotel?.nom}</td>
-                    <td>{r.dateDebut} → {r.dateFin}</td>
-                    <td>{r.montantTotal} DH</td>
-                    <td><span className={statut.className}>{statut.label}</span></td>
-                    <td className="actions">
-                      {r.statut === 'EN_ATTENTE' && (
-                        <button
-                          className="btn btn-primary btn-sm"
-                          disabled={paiementEnCours === r.id}
-                          onClick={() => payer(r.id)}
-                        >
-                          <IconCreditCard /> {paiementEnCours === r.id ? 'Traitement...' : 'Payer'}
+                  <Fragment key={r.id}>
+                    <tr>
+                      {isAdmin && <td>{r.clientNom} <span className="muted">({r.clientEmail})</span></td>}
+                      <td>{r.chambre?.numero}</td>
+                      <td>{r.chambre?.hotel?.nom}</td>
+                      <td>{r.dateDebut} → {r.dateFin}</td>
+                      <td>{r.montantTotal} DH</td>
+                      <td><span className={statut.className}>{statut.label}</span></td>
+                      <td className="actions">
+                        {r.statut === 'EN_ATTENTE' && (
+                          <button
+                            className="btn btn-primary btn-sm"
+                            disabled={paiementEnCours === r.id}
+                            onClick={() => payer(r.id)}
+                          >
+                            <IconCreditCard /> {paiementEnCours === r.id ? 'Traitement...' : 'Payer'}
+                          </button>
+                        )}
+                        <button className="btn btn-ghost btn-sm" onClick={() => toggleDetails(r.id)}>
+                          {ouvert ? 'Masquer' : 'Détails'}
                         </button>
-                      )}
-                      {isAdmin && (
-                        <button className="btn btn-danger btn-sm" onClick={() => supprimer(r.id)}>
-                          <IconTrash /> Supprimer
-                        </button>
-                      )}
-                    </td>
-                  </tr>
+                        {isAdmin && (
+                          <button className="btn btn-danger btn-sm" onClick={() => supprimer(r.id)}>
+                            <IconTrash /> Supprimer
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                    {ouvert && (
+                      <tr>
+                        <td colSpan={isAdmin ? 7 : 6} style={{ background: 'var(--page)' }}>
+                          <DetailsReservation reservationId={r.id} />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>
