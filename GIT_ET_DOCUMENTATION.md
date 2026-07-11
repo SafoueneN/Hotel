@@ -36,16 +36,25 @@ cahier des charges plutôt qu'à des messages génériques (« wip », « fix »
   à ouvrir le diff.
 - Un rythme réel de développement sur plusieurs jours, pas un unique commit final.
 
-## Intégration continue
+## Intégration et déploiement continus (CI/CD)
 
-Chaque push déclenche un pipeline CI (`.github/workflows/ci.yml`) qui :
+Chaque push déclenche deux pipelines GitHub Actions distincts :
+
+**CI** (`.github/workflows/ci.yml`) :
 - build les 4 services Spring Boot (eureka-server, config-server, api-gateway,
   reservation-service) avec Maven,
 - installe les dépendances et vérifie la syntaxe du payment-service (Node.js),
 - build le frontend (Vite),
 - valide la syntaxe de `docker-compose.yml`.
 
+**CD** (`.github/workflows/cd.yml`) :
+- build l'image Docker de chacun des 6 services,
+- les publie sur GitHub Container Registry (`ghcr.io/safouenen/hotelbook-<service>`),
+  taguées `latest` et avec le SHA du commit — donc chaque push produit des images
+  déployables et traçables jusqu'au commit exact qui les a générées.
+
 Statut des builds : https://github.com/SafoueneN/Hotel/actions
+Images publiées : https://github.com/SafoueneN?tab=packages
 
 Ça donne une preuve continue, indépendante de la machine locale, que le code poussé
 est réellement fonctionnel — pas seulement "ça marche chez moi".
