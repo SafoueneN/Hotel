@@ -5,7 +5,8 @@ const connectDB = require('./config/db');
 const createEurekaClient = require('./config/eureka');
 const fetchRemoteConfig = require('./config/configServer');
 const runtimeConfig = require('./config/runtimeConfig');
-const { connectRabbitMQ } = require('./config/rabbitmq');
+const { connectRabbitMQ, consommerReservationAnnulee } = require('./config/rabbitmq');
+const { rembourserReservation } = require('./controllers/paiementController');
 const openApiSpec = require('./config/openApiSpec');
 const paiementRoutes = require('./routes/paiementRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
@@ -58,6 +59,7 @@ async function demarrer() {
 
   try {
     await connectRabbitMQ();
+    await consommerReservationAnnulee(rembourserReservation);
   } catch (err) {
     console.warn('[payment-service] RabbitMQ injoignable au démarrage, nouvelle tentative au premier paiement', err.message);
   }

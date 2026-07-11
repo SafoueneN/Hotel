@@ -3,6 +3,7 @@ package com.hotelbook.reservation.service;
 import com.hotelbook.reservation.dto.ReservationRequest;
 import com.hotelbook.reservation.exception.ChambreIndisponibleException;
 import com.hotelbook.reservation.exception.ResourceNotFoundException;
+import com.hotelbook.reservation.messaging.ReservationEventPublisher;
 import com.hotelbook.reservation.model.Chambre;
 import com.hotelbook.reservation.model.Reservation;
 import com.hotelbook.reservation.model.StatutReservation;
@@ -22,6 +23,7 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ChambreRepository chambreRepository;
+    private final ReservationEventPublisher reservationEventPublisher;
 
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
@@ -106,12 +108,17 @@ public class ReservationService {
     public Reservation changerStatut(Long id, StatutReservation statut) {
         Reservation reservation = findById(id);
         reservation.setStatut(statut);
-        return reservationRepository.save(reservation);
+        Reservation sauvegardee = reservationRepository.save(reservation);
+        if (statut == StatutReservation.ANNULEE) {
+            reservationEventPublisher.publierReservationAnnulee(id);
+        }
+        return sauvegardee;
     }
 
     @Transactional
     public void supprimer(Long id) {
         Reservation reservation = findById(id);
         reservationRepository.delete(reservation);
+        reservationEventPublisher.publierReservationAnnulee(id);
     }
 }

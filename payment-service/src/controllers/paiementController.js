@@ -2,7 +2,7 @@ const Paiement = require('../models/Paiement');
 const Notification = require('../models/Notification');
 const runtimeConfig = require('../config/runtimeConfig');
 const { fetchReservation } = require('../config/reservationClient');
-const { publierPaiementReussi } = require('../config/rabbitmq');
+const { publierPaiementReussi, publierPaiementEchoue } = require('../config/rabbitmq');
 
 function simulerTraitementPaiement() {
   return Math.random() < runtimeConfig.tauxSuccesSimulation ? 'REUSSI' : 'ECHOUE';
@@ -49,6 +49,8 @@ async function payerReservation(req, res, next) {
 
     if (statut === 'REUSSI') {
       publierPaiementReussi(Number(reservationId));
+    } else {
+      publierPaiementEchoue(Number(reservationId));
     }
 
     return res.status(201).json(paiement);
@@ -187,6 +189,34 @@ async function getStatistiques(req, res, next) {
   }
 }
 
+// Reagit a l'evenement asynchrone 'reservation.annulee' publie par reservation-service :
+// rembourse automatiquement le dernier paiement reussi de la reservation, s'il y en a un.
+async function rembourserReservation(reservationId) {
+  const paiementReussi = await Paiement.findOne({ reservationId, statut: 'REUSSI' }).sort({ createdAt: -1 });
+  if (!paiementReussi) {
+    console.log(`[payment-service] Aucun paiement reussi pour la reservation ${reservationId}, rien a rembourser`);
+    return;
+  }
+
+  await Paiement.create({
+    reservationId,
+    clientEmail: paiementReussi.clientEmail,
+    montant: paiementReussi.montant,
+    methode: paiementReussi.methode,
+    statut: 'REMBOURSE',
+  });
+
+  await Notification.create({
+    destinataire: paiementReussi.clientEmail,
+    reservationId,
+    sujet: 'Remboursement effectué',
+    message: `Votre paiement de ${paiementReussi.montant} DH pour la réservation #${reservationId} a été remboursé suite à l'annulation.`,
+    envoyee: true,
+  });
+
+  console.log(`[payment-service] Remboursement créé pour la réservation ${reservationId}`);
+}
+
 module.exports = {
   creerPaiement,
   getAllPaiements,
@@ -196,4 +226,5 @@ module.exports = {
   deletePaiement,
   getStatistiques,
   payerReservation,
+  rembourserReservation,
 };

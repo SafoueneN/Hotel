@@ -43,7 +43,7 @@ Mini-projet de plateforme de réservation d'hôtel, réalisé en architecture mi
 | Serveur de configuration | `config-server/` — Spring Cloud Config (backend natif), consommé par les 3 services Spring + `payment-service` (Node) |
 | Dockerisation | `docker-compose.yml` — 10 conteneurs orchestrés avec healthchecks |
 | Sécurité Keycloak | Realm `hotelbook`, JWT validé au niveau de l'API Gateway (voir *Choix d'architecture* ci-dessous) |
-| Communication sync/async | `payment-service` appelle `reservation-service` en **synchrone** (REST) pour récupérer le montant, puis confirme la réservation en **asynchrone** via **RabbitMQ** |
+| Communication sync/async | Voir la section [Communication entre microservices](#communication-entre-microservices) — 3 scénarios synchrones (dont Feign Client) + 3 scénarios asynchrones (RabbitMQ) |
 
 ## Lancer le projet
 
@@ -88,6 +88,26 @@ Une collection est fournie : `HotelBook.postman_collection.json` (inclut la réc
 - **Règles d'autorisation** : lecture (`GET`) publique, écriture (`POST/PUT/PATCH`) authentifiée, suppression (`DELETE`) réservée au rôle `ADMIN`.
 - **Émetteur JWT** : Keycloak est configuré avec un hostname fixe (`http://localhost:8180`) afin que le claim `iss` du token reste identique quel que soit le point d'accès. La Gateway récupère les clés publiques via le réseau Docker interne (`jwk-set-uri`) mais valide l'émetteur externe — nécessaire car navigateur et conteneurs n'accèdent pas à Keycloak par le même chemin réseau.
 - **Développement local sans Docker** : chaque service Spring a un profil `dev` autonome (H2 en mémoire) ; le frontend peut tourner via `npm run dev` (Vite, port 5173) directement contre les mêmes services.
+
+## Communication entre microservices
+
+### Synchrone
+
+| # | Sens | Mécanisme | Description |
+|---|---|---|---|
+| 1 | `payment-service` → `reservation-service` | REST (client HTTP Node natif) | Avant d'encaisser, `payment-service` récupère le montant et le statut de la réservation (`GET /api/reservations/{id}`) |
+| 2 | `reservation-service` → `payment-service` | **Feign Client** (`PaymentServiceClient`, résolu via Eureka + LoadBalancer) | `GET /api/reservations/{id}/paiements` — proxy vers l'historique des paiements de la réservation |
+| 3 | `reservation-service` → `payment-service` | **Feign Client** | `GET /api/reservations/{id}/recap` — agrège réservation + paiements pour calculer le montant payé et le reste à payer |
+
+### Asynchrone (RabbitMQ, exchange `hotelbook.exchange`)
+
+| # | Sens | Routing key | Description |
+|---|---|---|---|
+| 1 | `payment-service` → `reservation-service` | `paiement.reussi` | Confirme automatiquement la réservation (`EN_ATTENTE` → `CONFIRMEE`) |
+| 2 | `payment-service` → `reservation-service` | `paiement.echoue` | Notifie l'échec ; la réservation reste `EN_ATTENTE` pour permettre une nouvelle tentative |
+| 3 | `reservation-service` → `payment-service` | `reservation.annulee` | Quand une réservation est annulée ou supprimée, `payment-service` rembourse automatiquement le dernier paiement réussi (nouveau paiement `statut: REMBOURSE` + notification client) |
+
+Le scénario 3 asynchrone est l'inverse du scénario 1 : il montre que la communication événementielle fonctionne dans les deux sens entre les deux services, pas seulement de `payment-service` vers `reservation-service`.
 
 ## Documentation Swagger centralisée
 

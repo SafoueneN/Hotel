@@ -22,7 +22,7 @@ const paiementSchema = new mongoose.Schema(
     },
     statut: {
       type: String,
-      enum: ['EN_ATTENTE', 'REUSSI', 'ECHOUE'],
+      enum: ['EN_ATTENTE', 'REUSSI', 'ECHOUE', 'REMBOURSE'],
       default: 'EN_ATTENTE',
     },
   },
