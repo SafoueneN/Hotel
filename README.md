@@ -69,6 +69,7 @@ docker compose ps
 | Config Server | http://localhost:8888 |
 | Keycloak Admin Console | http://localhost:8180 (admin/admin) |
 | RabbitMQ Management | http://localhost:15672 (guest/guest) |
+| **Documentation Swagger centralisée** | http://localhost:8090/swagger-ui.html |
 
 ### Comptes de test (Keycloak, realm `hotelbook`)
 
@@ -87,6 +88,27 @@ Une collection est fournie : `HotelBook.postman_collection.json` (inclut la réc
 - **Règles d'autorisation** : lecture (`GET`) publique, écriture (`POST/PUT/PATCH`) authentifiée, suppression (`DELETE`) réservée au rôle `ADMIN`.
 - **Émetteur JWT** : Keycloak est configuré avec un hostname fixe (`http://localhost:8180`) afin que le claim `iss` du token reste identique quel que soit le point d'accès. La Gateway récupère les clés publiques via le réseau Docker interne (`jwk-set-uri`) mais valide l'émetteur externe — nécessaire car navigateur et conteneurs n'accèdent pas à Keycloak par le même chemin réseau.
 - **Développement local sans Docker** : chaque service Spring a un profil `dev` autonome (H2 en mémoire) ; le frontend peut tourner via `npm run dev` (Vite, port 5173) directement contre les mêmes services.
+
+## Documentation Swagger centralisée
+
+Chaque microservice expose sa documentation OpenAPI, mais l'ensemble est consultable
+depuis un **point d'entrée unique côté API Gateway**, sans passer par les ports internes
+8081/8082 :
+
+**http://localhost:8090/swagger-ui.html**
+
+Un menu déroulant en haut de la page permet de basculer entre :
+- `api-gateway` — les endpoints propres à la Gateway
+- `reservation-service` — hôtels, chambres, réservations (générée automatiquement par
+  springdoc-openapi à partir des contrôleurs Spring)
+- `payment-service` — paiements, notifications (spécification OpenAPI écrite à la main,
+  car Node.js/Express n'a pas d'équivalent direct à springdoc)
+
+Techniquement, la Gateway ne fait qu'agréger : deux routes dédiées
+(`/docs/reservation-service/**` et `/docs/payment-service/**`) proxient vers le
+`/v3/api-docs` (ou `/api-docs`) de chaque service, et `springdoc.swagger-ui.urls` les
+liste toutes dans une seule interface. Les chemins Swagger sont explicitement rendus
+publics dans `SecurityConfig` (pas besoin de token pour consulter la documentation).
 
 ## Git et documentation
 

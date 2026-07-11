@@ -1,10 +1,12 @@
 require('dotenv').config();
 const express = require('express');
+const swaggerUi = require('swagger-ui-express');
 const connectDB = require('./config/db');
 const createEurekaClient = require('./config/eureka');
 const fetchRemoteConfig = require('./config/configServer');
 const runtimeConfig = require('./config/runtimeConfig');
 const { connectRabbitMQ } = require('./config/rabbitmq');
+const openApiSpec = require('./config/openApiSpec');
 const paiementRoutes = require('./routes/paiementRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 
@@ -19,6 +21,10 @@ app.get('/health', (req, res) => {
 app.get('/info', (req, res) => {
   res.json({ service: 'payment-service', ...runtimeConfig });
 });
+
+// Spec brute consommee par le Swagger UI agrege de l'API Gateway (/docs/payment-service/api-docs)
+app.get('/api-docs', (req, res) => res.json(openApiSpec));
+app.use('/swagger-ui', swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
 app.use('/api/paiements', paiementRoutes);
 app.use('/api/notifications', notificationRoutes);

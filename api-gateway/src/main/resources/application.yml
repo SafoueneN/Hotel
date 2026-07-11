@@ -22,6 +22,28 @@ spring:
               uri: lb://payment-service
               predicates:
                 - Path=/api/paiements/**,/api/notifications/**
+            - id: reservation-service-docs
+              uri: lb://reservation-service
+              predicates:
+                - Path=/docs/reservation-service/**
+              filters:
+                - RewritePath=/docs/reservation-service/(?<segment>.*), /${segment}
+            - id: payment-service-docs
+              uri: lb://payment-service
+              predicates:
+                - Path=/docs/payment-service/**
+              filters:
+                - RewritePath=/docs/payment-service/(?<segment>.*), /${segment}
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: api-gateway
+        url: /v3/api-docs
+      - name: reservation-service
+        url: /docs/reservation-service/v3/api-docs
+      - name: payment-service
+        url: /docs/payment-service/api-docs
 
 eureka:
   client:
