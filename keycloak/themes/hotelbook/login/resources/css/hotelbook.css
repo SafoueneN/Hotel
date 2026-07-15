@@ -1,0 +1,46 @@
+/*
+ * Theme de connexion Keycloak reprenant la charte du frontend HotelBook
+ * (memes tokens de couleur que frontend/src/index.css), pour repondre au
+ * critere "le theme de Keycloak est personnalise selon le template du front-end".
+ */
+
+:root {
+  --pf-v5-global--primary-color--100: #2a78d6;
+  --pf-v5-global--primary-color--200: #1c5cab;
+  --pf-v5-global--primary-color--dark-100: #2a78d6;
+  --pf-v5-global--BackgroundColor--light-100: #f7f7f5;
+  --pf-v5-global--BackgroundColor--300: #fcfcfb;
+  --pf-v5-global--FontFamily--sans-serif: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pf-v5-global--primary-color--100: #3987e5;
+    --pf-v5-global--primary-color--200: #86b6ef;
+    --pf-v5-global--primary-color--dark-100: #3987e5;
+    --pf-v5-global--BackgroundColor--light-100: #121212;
+    --pf-v5-global--BackgroundColor--300: #1a1a19;
+  }
+}
+
+.login-pf body {
+  background: var(--pf-v5-global--BackgroundColor--light-100) !important;
+  font-family: var(--pf-v5-global--FontFamily--sans-serif);
+}
+
+.pf-v5-c-login__main {
+  border-radius: 18px;
+  box-shadow: 0 12px 32px rgba(11, 11, 11, 0.10), 0 2px 6px rgba(11, 11, 11, 0.05);
+}
+
+#kc-header-wrapper {
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--pf-v5-global--primary-color--100) !important;
+}
+
+.pf-v5-c-button.pf-m-primary {
+  border-radius: 8px;
+}
